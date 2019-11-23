@@ -1,6 +1,8 @@
 package services
 
 import (
+	"strings"
+
 	"github.com/mic3ael/bookstore_user-api/domain/users"
 	"github.com/mic3ael/bookstore_user-api/utils/errors"
 )
@@ -31,4 +33,53 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 // FindUser ...
 func FindUser() {
 
+}
+
+// UpdateUser ...
+func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
+	current, err := GetUser(user.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	user.FirstName = strings.TrimSpace(user.FirstName)
+	user.LastName = strings.TrimSpace(user.LastName)
+
+	if !isPartial {
+		current.FirstName = user.FirstName
+		current.LastName = user.LastName
+
+		if emailErr := user.Validate(); emailErr != nil {
+			return nil, emailErr
+		}
+
+		current.Email = user.Email
+	} else {
+
+		if user.FirstName != "" {
+			current.FirstName = user.FirstName
+		}
+		if user.LastName != "" {
+			current.LastName = user.LastName
+		}
+
+		if user.Email != "" {
+			if emailErr := user.Validate(); emailErr != nil {
+				return nil, emailErr
+			}
+			current.Email = user.Email
+		}
+	}
+
+	if err := current.Update(); err != nil {
+		return nil, err
+	}
+
+	return current, nil
+}
+
+func DeleteUser(userID uint64) *errors.RestErr {
+	user := &users.User{ID: userID}
+	return user.Delete()
 }

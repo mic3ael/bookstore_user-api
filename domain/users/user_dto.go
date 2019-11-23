@@ -9,10 +9,13 @@ import (
 // User ...
 type User struct {
 	ID        uint64 `json:"id"`
-	FirstNmae string `json:"first_name"`
+	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
+	Password  string `json:"password"`
 	Email     string `json:"email"`
-	CreatedAt uint64 `json:"created_at"`
+	CreatedOn uint64 `json:"created_on"`
+	Deleted   bool   `json:"deleted"`
+	UpdatedOn uint64 `json:"updated_on"`
 }
 
 func (user *User) Validate() *errors.RestErr {
