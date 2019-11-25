@@ -11,11 +11,12 @@ type User struct {
 	ID        uint64 `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Password  string `json:"password"`
+	Password  string `json:"-"`
 	Email     string `json:"email"`
 	CreatedOn uint64 `json:"created_on"`
-	Deleted   bool   `json:"deleted"`
+	Deleted   bool   `json:"-"`
 	UpdatedOn uint64 `json:"updated_on"`
+	Status    string `json:"status"`
 }
 
 func (user *User) Validate() *errors.RestErr {
