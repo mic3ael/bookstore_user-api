@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mic3ael/bookstore_user-api/datasources/psql/bookstore_db"
+	"github.com/mic3ael/bookstore_user-api/utils/crypto_utils"
 	"github.com/mic3ael/bookstore_user-api/utils/date_utils"
 	"github.com/mic3ael/bookstore_user-api/utils/psql_utils"
 
@@ -11,8 +12,8 @@ import (
 )
 
 const (
-	quetyInsertUser       = "INSERT INTO users (first_name, last_name, email, password, created_on, updated_on) VALUES($1, $2, $3, $4, $5, $6) RETURNING id;"
-	quetyGetUser          = "SELECT id, first_name, last_name, email, created_on, updated_on FROM users WHERE id=$1 AND deleted=false;"
+	quetyInsertUser       = "INSERT INTO users (first_name, last_name, email, password, status, created_on, updated_on) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id;"
+	quetyGetUser          = "SELECT id, first_name, last_name, email, status, created_on, updated_on FROM users WHERE id=$1 AND deleted=false;"
 	queryUpdateUser       = "UPDATE users SET first_name=$2, last_name=$3, email=$4, updated_on=$5 WHERE id=$1;"
 	queryDeleteUser       = "UPDATE users SET deleted=true, updated_on=$2 WHERE id=$1;"
 	queryFindUserByStatus = "SELECT id, first_name, last_name, email, created_on, updated_on, status FROM users WHERE status=$1;"
@@ -29,7 +30,7 @@ func (user *User) Get() *errors.RestErr {
 
 	result := stmt.QueryRow(user.ID)
 
-	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.CreatedOn, &user.UpdatedOn); getErr != nil {
+	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Status, &user.CreatedOn, &user.UpdatedOn); getErr != nil {
 		return psqlutils.ParseError(getErr)
 	}
 
@@ -46,12 +47,13 @@ func (user *User) Save() *errors.RestErr {
 	defer stmt.Close()
 	date := dateutils.GetNowUint()
 	user.CreatedOn = date
-	user.Password = "123"
+	user.Password = cryptoutils.GetMd5(user.Password)
 	user.Deleted = false
 	user.UpdatedOn = date
+	user.Status = StatusActive
 	var userID uint64
 
-	saveErr := stmt.QueryRow(user.FirstName, user.LastName, user.Email, user.Password, user.CreatedOn, user.UpdatedOn).Scan(&userID)
+	saveErr := stmt.QueryRow(user.FirstName, user.LastName, user.Email, user.Password, user.Status, user.CreatedOn, user.UpdatedOn).Scan(&userID)
 
 	if saveErr != nil {
 		fmt.Println(saveErr)
@@ -118,8 +120,8 @@ func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
 	results := make([]User, 0)
 	for rows.Next() {
 		var user User
-		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.CreatedOn, &user.UpdatedOn, &user.Status); err != nil {
-			return nil, psqlutils.ParseError(err)
+		if errScan := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.CreatedOn, &user.UpdatedOn, &user.Status); errScan != nil {
+			return nil, psqlutils.ParseError(errScan)
 		}
 		results = append(results, user)
 	}

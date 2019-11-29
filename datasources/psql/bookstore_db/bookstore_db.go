@@ -59,7 +59,8 @@ func init() {
    			password VARCHAR (100) NOT NULL,
 			email VARCHAR (355) UNIQUE NOT NULL,
 			updated_on bigint NOT NULL,
-			deleted BOOL DEFAULT false NOT NULL, 
+			deleted BOOL DEFAULT false NOT NULL,
+			status VARCHAR(45) NOT NULL, 
    			created_on bigint NOT NULL)`)
 
 	if err != nil {

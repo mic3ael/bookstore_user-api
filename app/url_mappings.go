@@ -6,7 +6,7 @@ import (
 
 // MapUrls ...
 func mapUrls() {
-	router.GET("/users/search", users.Search)
+	router.GET("/internal/users/search", users.Search)
 	router.POST("/users", users.CreateUser)
 	router.GET("/users/:id", users.GetUser)
 	router.PUT("/users/:id", users.UpdateUser)

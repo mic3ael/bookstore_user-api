@@ -30,11 +30,6 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	return &user, nil
 }
 
-// FindUser ...
-func FindUser() {
-
-}
-
 // UpdateUser ...
 func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
 	current, err := GetUser(user.ID)
@@ -84,7 +79,7 @@ func DeleteUser(userID uint64) *errors.RestErr {
 	return user.Delete()
 }
 
-func FindByStatus(status string) ([]users.User, *errors.RestErr) {
+func FindByStatus(status string) (users.Users, *errors.RestErr) {
 	dao := &users.User{}
 	return dao.FindByStatus(status)
 }
